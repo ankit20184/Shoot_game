@@ -4,6 +4,7 @@ from alien import Alien
 from bullet import Bullet
 from time import sleep
 from ship import Ship
+
 def check_keydown_events(event, ai_settings, screen, ship, bullets):
     """Respond to key presses."""
     if event.key == pygame.K_RIGHT:
@@ -27,12 +28,27 @@ def check_keyup_events(event, ship):
     elif event.key == pygame.K_LEFT:
         ship.moving_left = False
 
+def check_play_button(stats, play_button, mouse_x, mouse_y,aliens,bullets,ship,ai_settings,screen):
+    button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked and not stats.game_active:
+         stats.reset_stats()
+         stats.game_active = True
+         aliens.empty()
+         bullets.empty()
+         create_fleet(ai_settings, screen, aliens,ship)
+         ship.center_ship()
 
-def check_events(ai_settings, screen, ship, bullets):
+
+
+def check_events(ai_settings, screen, ship, bullets,stats,play_button,aliens):
     """Respond to keyboard and mouse events."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+              mouse_x, mouse_y = pygame.mouse.get_pos()
+              check_play_button(stats, play_button, mouse_x, mouse_y,aliens,bullets,ship,ai_settings,screen)
 
         elif event.type == pygame.KEYDOWN:
             check_keydown_events(
@@ -43,22 +59,29 @@ def check_events(ai_settings, screen, ship, bullets):
             check_keyup_events(event, ship)
 
 
-def update_screen(ai_settings, screen, ship, bullets,aliens):
+def update_screen(ai_settings, screen, ship,bullets,aliens,play_button,stats,sb):
     """Update images on the screen and flip to the new screen."""
     screen.fill(ai_settings.bg_color)
-
+    sb.show_score()
+    if  not stats.game_active:
+         play_button.draw_button()
     for bullet in bullets.sprites():
         bullet.draw_bullet()
-
+    
     ship.blitme()
     
     aliens.draw(screen)
 
     pygame.display.flip()
 
-def update_bullets(aliens,bullets):
+def update_bullets(aliens,bullets,ai_settings,stats,sb):
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     bullets.update()
+    if collisions:
+        for aliens in collisions.values():
+            stats.score += ai_settings.alien_points * len(aliens)
+        
+        sb.prep_score()
  # Get rid of bullets that have disappeared.
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
@@ -169,6 +192,7 @@ def ship_hit(ai_settings, aliens,stats,screen,bullets,ship):
         sleep(0.5)
     else:
         stats.game_active=False
+        pygame.mouse.set_visible(True)
 
 def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
 

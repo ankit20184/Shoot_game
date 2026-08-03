@@ -16,3 +16,4 @@ class Settings():
      self.fleet_drop_speed = 10
      self.fleet_direction=1
      self.ship_limit = 3
+     self.alien_points = 50

@@ -14,9 +14,6 @@ def check_keydown_events(event, ai_settings, screen, ship, bullets):
 
     elif event.key == pygame.K_SPACE:
         fire_bullet(ai_settings, screen, ship, bullets)
-        if len(bullets) < ai_settings.bullets_allowed:
-            new_bullet = Bullet(ai_settings, screen, ship)
-            bullets.add(new_bullet)
 
     elif event.key == pygame.K_q:
         sys.exit()
@@ -62,10 +59,10 @@ def update_screen(ai_settings, screen, ship, bullets,aliens):
 def update_bullets(aliens,bullets):
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     bullets.update()
-#  # Get rid of bullets that have disappeared.
-#     for bullet in bullets.copy():
-#         if bullet.rect.bottom <= 0:
-#             bullets.remove(bullet)
+ # Get rid of bullets that have disappeared.
+    for bullet in bullets.copy():
+        if bullet.rect.bottom <= 0:
+            bullets.remove(bullet)
 
 
 def fire_bullet(ai_settings, screen, ship, bullets):
@@ -132,10 +129,6 @@ def get_number_rows(ai_settings, ship_height, alien_height):
     number_rows = available_space_y // (2 * alien_height)
     return number_rows
 
-def update_aliens(aliens):
-
-    aliens.update()
-
 
 def check_fleet_edges(ai_settings, aliens):
 
@@ -145,9 +138,9 @@ def check_fleet_edges(ai_settings, aliens):
             break
 
 def change_fleet_direction(ai_settings, aliens):
+    for alien in aliens.sprites():
+        alien.rect.y += ai_settings.fleet_drop_speed
 
- for alien in aliens.sprites():
-    alien.rect.y += ai_settings.fleet_drop_speed
     ai_settings.fleet_direction *= -1
 
 def update_aliens(ai_settings, aliens):
